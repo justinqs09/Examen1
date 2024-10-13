@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas</title>
+    <link rel="stylesheet" href="styleEstadistica.css">;
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .provincia {
+            margin-bottom: 20px;
+        }
+
+        .record {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .record p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Estadísticas de Calidad del Aire</h2>
+    <div id="estadisticas"></div>
+
+    <script>
+        function agruparPorProvincia(registros) {
+            let grupos = {};
+
+            registros.forEach(registro => {
+                if (!grupos[registro.provincia]) {
+                    grupos[registro.provincia] = [];
+                }
+                grupos[registro.provincia].push(registro);
+            });
+
+            return grupos;
+        }
+
+        function mostrarEstadisticas() {
+            let registros = JSON.parse(localStorage.getItem('registros')) || [];
+
+            if (registros.length === 0) {
+                document.getElementById('estadisticas').innerHTML = '<p>No hay datos disponibles.</p>';
+                return;
+            }
+
+            // Agrupar por provincia
+            let registrosPorProvincia = agruparPorProvincia(registros);
+
+            let estadisticasDiv = document.getElementById('estadisticas');
+            estadisticasDiv.innerHTML = '';
+
+            for (let provincia in registrosPorProvincia) {
+                // Ordenar los registros de cada provincia por calidad de aire (descendente)
+                let registrosOrdenados = registrosPorProvincia[provincia].sort((a, b) => b.calidadAire - a.calidadAire);
+
+                let provinciaDiv = document.createElement('div');
+                provinciaDiv.classList.add('provincia');
+
+                let provinciaTitulo = document.createElement('h3');
+                provinciaTitulo.textContent = `Provincia: ${provincia}`;
+                provinciaDiv.appendChild(provinciaTitulo);
+
+                // Mostrar cada registro de la provincia
+                registrosOrdenados.forEach(registro => {
+                    let recordDiv = document.createElement('div');
+                    recordDiv.classList.add('record');
+                    recordDiv.innerHTML = `
+                        <p><strong>Fecha:</strong> ${registro.fecha}</p>
+                        <p><strong>Calidad del aire:</strong> ${registro.calidadAire}</p>
+                        <p><strong>Clima:</strong> ${registro.clima}</p>
+                        <p><strong>Temperatura mínima:</strong> ${registro.tempMin}°C</p>
+                        <p><strong>Temperatura máxima:</strong> ${registro.tempMax}°C</p>
+                        <p><strong>Humedad:</strong> ${registro.humedad}%</p>
+                        <p><strong>¿Lluvia?:</strong> ${registro.lluvia}</p>
+                    `;
+                    provinciaDiv.appendChild(recordDiv);
+                });
+
+                estadisticasDiv.appendChild(provinciaDiv);
+            }
+        }
+
+        // Llamar a la función cuando la página cargue
+        window.onload = mostrarEstadisticas;
+    </script>
+
+</body>
+</html>
+

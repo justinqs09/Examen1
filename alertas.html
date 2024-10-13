@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alertas</title>
+    <link rel="stylesheet" href="styleAlerta.css">;
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .alerta {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        .alerta-amarilla {
+            background-color: #ffcc00;
+        }
+
+        .alerta-roja {
+            background-color: #ff6666;
+        }
+
+        .alerta-critica {
+            background-color: #ff3300;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Alertas por Provincia</h2>
+    <div id="alertas"></div>
+
+    <script>
+        function determinarAlerta(calidadAire) {
+            if (calidadAire > 150) {
+                return 'critica';
+            } else if (calidadAire > 100) {
+                return 'roja';
+            } else if (calidadAire > 50) {
+                return 'amarilla';
+            } else {
+                return null;  // No alerta
+            }
+        }
+
+        function mostrarAlertas() {
+            let registros = JSON.parse(localStorage.getItem('registros')) || [];
+
+            if (registros.length === 0) {
+                document.getElementById('alertas').innerHTML = '<p>No hay alertas disponibles.</p>';
+                return;
+            }
+
+            let alertasDiv = document.getElementById('alertas');
+            alertasDiv.innerHTML = '';
+
+            registros.forEach(registro => {
+                let tipoAlerta = determinarAlerta(registro.calidadAire);
+                
+                if (tipoAlerta) {
+                    let alertaDiv = document.createElement('div');
+                    alertaDiv.classList.add('alerta', `alerta-${tipoAlerta}`);
+                    
+                    let mensajeAlerta;
+                    if (tipoAlerta === 'amarilla') {
+                        mensajeAlerta = 'Alerta amarilla: La calidad del aire es moderada, tenga precaución si es sensible a la contaminación.';
+                    } else if (tipoAlerta === 'roja') {
+                        mensajeAlerta = 'Alerta roja: La calidad del aire es mala, se recomienda evitar actividades al aire libre.';
+                    } else if (tipoAlerta === 'critica') {
+                        mensajeAlerta = 'Alerta crítica: La calidad del aire es muy peligrosa, evite salir y mantenga ventanas cerradas.';
+                    }
+
+                    alertaDiv.innerHTML = `
+                        <p><strong>Provincia:</strong> ${registro.provincia}</p>
+                        <p><strong>Calidad del aire:</strong> ${registro.calidadAire}</p>
+                        <p>${mensajeAlerta}</p>
+                        <p><strong>Clima:</strong> ${registro.clima}</p>
+                        <p><strong>Hora:</strong> ${registro.hora}</p>
+                        <p><strong>¿Lluvia?:</strong> ${registro.lluvia}</p>
+                    `;
+
+                    alertasDiv.appendChild(alertaDiv);
+                }
+            });
+        }
+
+        // Llamar a la función cuando la página cargue
+        window.onload = mostrarAlertas;
+    </script>
+
+</body>
+</html>

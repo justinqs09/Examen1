@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingresar Datos</title>
+    <link rel="stylesheet" href="styleIngresar.css">;
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: auto;
+            background-color: #f2f2f2;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            float: right;
+            width: 40%;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Formulario para Ingresar Datos</h2>
+    <form id="form-datos">
+        <label for="provincia">Provincia:</label>
+        <input type="text" id="provincia" name="provincia" required>
+
+        <label for="calidad-aire">Calidad del Aire por Día:</label>
+        <input type="text" id="calidad-aire" name="calidad-aire" required>
+
+        <label for="hora">Hora:</label>
+        <input type="time" id="hora" name="hora" required>
+
+        <label for="lluvia">¿Lluvia? (Sí/No):</label>
+        <select id="lluvia" name="lluvia" required>
+            <option value="Sí">Sí</option>
+            <option value="No">No</option>
+        </select>
+
+        <label for="clima">Clima:</label>
+        <input type="text" id="clima" name="clima" required>
+
+        <label for="temp-min">Temperatura Mínima (°C):</label>
+        <input type="number" id="temp-min" name="temp-min" required>
+
+        <label for="temp-max">Temperatura Máxima (°C):</label>
+        <input type="number" id="temp-max" name="temp-max" required>
+
+        <label for="humedad">Humedad (%):</label>
+        <input type="number" id="humedad" name="humedad" required>
+
+        <button type="submit">Enviar Datos</button>
+    </form>
+    <script>
+        document.getElementById('form-datos').addEventListener('submit', async function(event) {
+            event.preventDefault();
+    
+            // Obtener los datos ingresados
+            let provincia = document.getElementById('provincia').value;
+            let calidadAire = parseInt(document.getElementById('calidad-aire').value);
+            let hora = document.getElementById('hora').value;
+            let lluvia = document.getElementById('lluvia').value;
+            let clima = document.getElementById('clima').value;
+            let tempMin = document.getElementById('temp-min').value;
+            let tempMax = document.getElementById('temp-max').value;
+            let humedad = document.getElementById('humedad').value;
+    
+            let fecha = new Date().toISOString().split('T')[0];
+    
+            // Crear objeto con los datos
+            let registro = {
+                provincia: provincia,
+                calidadAire: calidadAire,
+                hora: hora,
+                lluvia: lluvia,
+                clima: clima,
+                tempMin: tempMin,
+                tempMax: tempMax,
+                humedad: humedad,
+                fecha: fecha
+            };
+    
+            try {
+               
+                const response = await fetch('http://localhost:3000/api/ingresar-datos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(registro)
+                });
+    
+                const result = await response.text();
+    
+                if (response.ok) {
+                    alert(result);  
+                    window.location.href = "estadisticas.html";
+                } else {
+                    alert('Error al guardar datos');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al conectarse con el servidor');
+    
+                
+                let registros = JSON.parse(localStorage.getItem('registros')) || [];
+                registros.push(registro);
+                localStorage.setItem('registros', JSON.stringify(registros));
+    
+                alert('Datos guardados exitosamente en local storage');
+                window.location.href = "estadisticas.html"; // Redireccionar a estadísticas
+            }
+        });
+    </script>
+    
+
+</body>
+</html>
